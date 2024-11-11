@@ -1,7 +1,7 @@
 import { BigintIsh, CurrencyAmount, Price, Token } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
-import { FACTORY_ADDRESS, FeeAmount, POOL_INIT_CODE_HASH } from '../constants'
+import { FACTORY_ADDRESS, FeeAmount, POOL_INIT_CODE_HASH, TICK_SPACINGS } from '../constants'
 import { NEGATIVE_ONE, Q192 } from '../internalConstants'
 import { computePoolAddress } from '../utils/computePoolAddress'
 import { v3Swap } from '../utils/v3swap'
@@ -62,11 +62,11 @@ export class Pool {
     tokenA: Token,
     tokenB: Token,
     fee: FeeAmount,
-    tickSpacing: number,
     sqrtRatioX96: BigintIsh,
     liquidity: BigintIsh,
     tickCurrent: number,
-    ticks: TickDataProvider | (Tick | TickConstructorArgs)[] = NO_TICK_DATA_PROVIDER_DEFAULT
+    ticks: TickDataProvider | (Tick | TickConstructorArgs)[] = NO_TICK_DATA_PROVIDER_DEFAULT,
+    tickSpacing?: number,
   ) {
     invariant(Number.isInteger(fee) && fee < 1_000_000, 'FEE')
 
@@ -80,11 +80,11 @@ export class Pool {
       // always create a copy of the list since we want the pool's tick list to be immutable
       ;[this.token0, this.token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
     this.fee = fee
-    this.tickSpacing = tickSpacing
+    this.tickSpacing = tickSpacing ?? TICK_SPACINGS[fee]
     this.sqrtRatioX96 = JSBI.BigInt(sqrtRatioX96)
     this.liquidity = JSBI.BigInt(liquidity)
     this.tickCurrent = tickCurrent
-    this.tickDataProvider = Array.isArray(ticks) ? new TickListDataProvider(ticks, tickSpacing) : ticks
+    this.tickDataProvider = Array.isArray(ticks) ? new TickListDataProvider(ticks, this.tickSpacing) : ticks
   }
 
   /**
@@ -166,7 +166,7 @@ export class Pool {
     const outputToken = zeroForOne ? this.token1 : this.token0
     return [
       CurrencyAmount.fromRawAmount(outputToken, JSBI.multiply(outputAmount, NEGATIVE_ONE)),
-      new Pool(this.token0, this.token1, this.fee, this.tickSpacing, sqrtRatioX96, liquidity, tickCurrent, this.tickDataProvider),
+      new Pool(this.token0, this.token1, this.fee, sqrtRatioX96, liquidity, tickCurrent, this.tickDataProvider, this.tickSpacing,),
     ]
   }
 
@@ -193,7 +193,7 @@ export class Pool {
     const inputToken = zeroForOne ? this.token0 : this.token1
     return [
       CurrencyAmount.fromRawAmount(inputToken, inputAmount),
-      new Pool(this.token0, this.token1, this.fee, this.tickSpacing, sqrtRatioX96, liquidity, tickCurrent, this.tickDataProvider),
+      new Pool(this.token0, this.token1, this.fee, sqrtRatioX96, liquidity, tickCurrent, this.tickDataProvider, this.tickSpacing),
     ]
   }
 

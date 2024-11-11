@@ -1,5 +1,5 @@
 import JSBI from 'jsbi'
-import { subIn256 } from '.'
+import { subIn256 } from './tickLibrary'
 
 const Q128 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(128))
 
@@ -7,7 +7,7 @@ export abstract class PositionLibrary {
   /**
    * Cannot be constructed.
    */
-  private constructor() {}
+  private constructor() { }
 
   // replicates the portions of Position#update required to compute unaccounted fees
   public static getTokensOwed(
