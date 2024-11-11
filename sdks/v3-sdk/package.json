@@ -1,9 +1,11 @@
 {
-  "name": "@uniswap/v3-sdk",
-  "description": "⚒️ An SDK for building applications on top of Uniswap V3",
+  "name": "aerodrome-v3-sdk",
+  "version": "0.1.0",
+  "description": "⚒️ An SDK for building applications on top of Aerodrome",
   "repository": "https://github.com/Uniswap/sdks.git",
   "keywords": [
-    "uniswap",
+    "aerodrome",
+    "slistream",
     "ethereum"
   ],
   "license": "MIT",
