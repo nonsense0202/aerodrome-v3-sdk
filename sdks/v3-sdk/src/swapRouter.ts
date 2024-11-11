@@ -54,7 +54,7 @@ export abstract class SwapRouter {
   /**
    * Cannot be constructed.
    */
-  private constructor() {}
+  private constructor() { }
 
   /**
    * Produces the on-chain method name to call and the hex encoded parameters to pass as arguments for a given trade.
@@ -126,7 +126,7 @@ export abstract class SwapRouter {
             const exactInputSingleParams = {
               tokenIn: route.tokenPath[0].address,
               tokenOut: route.tokenPath[1].address,
-              fee: route.pools[0].fee,
+              tickSpacing: route.pools[0].tickSpacing,
               recipient: routerMustCustody ? ADDRESS_ZERO : recipient,
               deadline,
               amountIn,
@@ -139,7 +139,7 @@ export abstract class SwapRouter {
             const exactOutputSingleParams = {
               tokenIn: route.tokenPath[0].address,
               tokenOut: route.tokenPath[1].address,
-              fee: route.pools[0].fee,
+              tickSpacing: route.pools[0].tickSpacing,
               recipient: routerMustCustody ? ADDRESS_ZERO : recipient,
               deadline,
               amountOut,

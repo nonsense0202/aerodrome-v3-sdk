@@ -5,7 +5,7 @@ import IQuoter from '@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Q
 import IQuoterV2 from '@uniswap/swap-router-contracts/artifacts/contracts/lens/QuoterV2.sol/QuoterV2.json'
 import { Route } from './entities'
 import invariant from 'tiny-invariant'
-import { FeeAmount } from './constants'
+
 
 /**
  * Optional arguments to send to the quoter.
@@ -23,7 +23,7 @@ export interface QuoteOptions {
 }
 
 interface BaseQuoteParams {
-  fee: FeeAmount
+  tickSpacing: number
   sqrtPriceLimitX96: string
   tokenIn: string
   tokenOut: string
@@ -63,7 +63,7 @@ export abstract class SwapQuoter {
       const baseQuoteParams: BaseQuoteParams = {
         tokenIn: route.tokenPath[0].address,
         tokenOut: route.tokenPath[1].address,
-        fee: route.pools[0].fee,
+        tickSpacing: route.pools[0].tickSpacing,
         sqrtPriceLimitX96: toHex(options?.sqrtPriceLimitX96 ?? 0),
       }
 
@@ -75,7 +75,7 @@ export abstract class SwapQuoter {
       const v1QuoteParams = [
         baseQuoteParams.tokenIn,
         baseQuoteParams.tokenOut,
-        baseQuoteParams.fee,
+        baseQuoteParams.tickSpacing,
         quoteAmount,
         baseQuoteParams.sqrtPriceLimitX96,
       ]

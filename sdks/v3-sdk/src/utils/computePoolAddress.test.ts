@@ -1,8 +1,8 @@
 import { defaultAbiCoder } from '@ethersproject/abi'
 import { Token } from '@uniswap/sdk-core'
 import { computeZksyncCreate2Address } from '@uniswap/sdk-core'
-import { FeeAmount } from '../constants'
-import { computePoolAddress } from './computePoolAddress'
+import { FACTORY_ADDRESS, FeeAmount, POOL_IMPLEMENTATION } from '../constants'
+import { computePoolAddress, computePoolAddress } from './computePoolAddress'
 import { keccak256 as solKeccak256 } from '@ethersproject/solidity'
 
 describe('#computePoolAddress', () => {
@@ -18,6 +18,19 @@ describe('#computePoolAddress', () => {
     })
 
     expect(result).toEqual('0x90B1b09A9715CaDbFD9331b3A7652B24BfBEfD32')
+  })
+  it('should correctly compute the pool address for aerodrome', () => {
+    const tokenA = new Token(1, '0x4200000000000000000000000000000000000006', 18, 'WETH', 'WETH')
+    const tokenB = new Token(1, '0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452', 18, 'WSTETH', 'WSTETH')
+    const result = computePoolAddress({
+      factoryAddress: FACTORY_ADDRESS,
+      tickSpacing: 1,
+      tokenA,
+      tokenB,
+      poolImplmentation: POOL_IMPLEMENTATION
+    })
+
+    expect(result).toEqual('0x861A2922bE165a5Bd41b1E482B49216b465e1B5F')
   })
 
   it('should correctly compute the pool address', () => {

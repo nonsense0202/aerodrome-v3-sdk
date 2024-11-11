@@ -163,6 +163,7 @@ export class Position {
       this.pool.token0,
       this.pool.token1,
       this.pool.fee,
+      this.pool.tickSpacing,
       sqrtRatioX96Lower,
       0 /* liquidity doesn't matter */,
       TickMath.getTickAtSqrtRatio(sqrtRatioX96Lower)
@@ -171,6 +172,7 @@ export class Position {
       this.pool.token0,
       this.pool.token1,
       this.pool.fee,
+      this.pool.tickSpacing,
       sqrtRatioX96Upper,
       0 /* liquidity doesn't matter */,
       TickMath.getTickAtSqrtRatio(sqrtRatioX96Upper)
@@ -219,6 +221,7 @@ export class Position {
       this.pool.token0,
       this.pool.token1,
       this.pool.fee,
+      this.pool.tickSpacing,
       sqrtRatioX96Lower,
       0 /* liquidity doesn't matter */,
       TickMath.getTickAtSqrtRatio(sqrtRatioX96Lower)
@@ -227,6 +230,7 @@ export class Position {
       this.pool.token0,
       this.pool.token1,
       this.pool.fee,
+      this.pool.tickSpacing,
       sqrtRatioX96Upper,
       0 /* liquidity doesn't matter */,
       TickMath.getTickAtSqrtRatio(sqrtRatioX96Upper)

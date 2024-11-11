@@ -17,7 +17,6 @@ import { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer'
 import INonfungiblePositionManager from '@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json'
 import { PermitOptions, SelfPermit } from './selfPermit'
 import { ADDRESS_ZERO } from './constants'
-import { Pool } from './entities'
 import { Multicall } from './multicall'
 import { Payments } from './payments'
 
@@ -201,23 +200,23 @@ export abstract class NonfungiblePositionManager {
   /**
    * Cannot be constructed.
    */
-  private constructor() {}
+  private constructor() { }
 
-  private static encodeCreate(pool: Pool): string {
-    return NonfungiblePositionManager.INTERFACE.encodeFunctionData('createAndInitializePoolIfNecessary', [
-      pool.token0.address,
-      pool.token1.address,
-      pool.fee,
-      toHex(pool.sqrtRatioX96),
-    ])
-  }
+  // private static encodeCreate(pool: Pool): string {
+  //   return NonfungiblePositionManager.INTERFACE.encodeFunctionData('createAndInitializePoolIfNecessary', [
+  //     pool.token0.address,
+  //     pool.token1.address,
+  //     pool.fee,
+  //     toHex(pool.sqrtRatioX96),
+  //   ])
+  // }
 
-  public static createCallParameters(pool: Pool): MethodParameters {
-    return {
-      calldata: this.encodeCreate(pool),
-      value: toHex(0),
-    }
-  }
+  // public static createCallParameters(pool: Pool): MethodParameters {
+  //   return {
+  //     calldata: this.encodeCreate(pool),
+  //     value: toHex(0),
+  //   }
+  // }
 
   public static addCallParameters(position: Position, options: AddLiquidityOptions): MethodParameters {
     invariant(JSBI.greaterThan(position.liquidity, ZERO), 'ZERO_LIQUIDITY')
@@ -235,9 +234,9 @@ export abstract class NonfungiblePositionManager {
     const deadline = toHex(options.deadline)
 
     // create pool if needed
-    if (isMint(options) && options.createPool) {
-      calldatas.push(this.encodeCreate(position.pool))
-    }
+    // if (isMint(options) && options.createPool) {
+    //   calldatas.push(this.encodeCreate(position.pool))
+    // }
 
     // permits if necessary
     if (options.token0Permit) {
@@ -256,7 +255,7 @@ export abstract class NonfungiblePositionManager {
           {
             token0: position.pool.token0.address,
             token1: position.pool.token1.address,
-            fee: position.pool.fee,
+            tickSpacing: position.pool.tickSpacing,
             tickLower: position.tickLower,
             tickUpper: position.tickUpper,
             amount0Desired: toHex(amount0Desired),
@@ -265,6 +264,8 @@ export abstract class NonfungiblePositionManager {
             amount1Min,
             recipient,
             deadline,
+            sqrtPriceX96: toHex(0)
+            // sqrtPriceX96: toHex(options.createPool ? position.pool.sqrtRatioX96 : 0),
           },
         ])
       )

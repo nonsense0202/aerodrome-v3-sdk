@@ -1,7 +1,7 @@
 import { BigintIsh, CurrencyAmount, Price, Token } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
-import { FACTORY_ADDRESS, FeeAmount, TICK_SPACINGS } from '../constants'
+import { FACTORY_ADDRESS, FeeAmount, POOL_INIT_CODE_HASH } from '../constants'
 import { NEGATIVE_ONE, Q192 } from '../internalConstants'
 import { computePoolAddress } from '../utils/computePoolAddress'
 import { v3Swap } from '../utils/v3swap'
@@ -22,6 +22,7 @@ export class Pool {
   public readonly token0: Token
   public readonly token1: Token
   public readonly fee: FeeAmount
+  public readonly tickSpacing: number
   public readonly sqrtRatioX96: JSBI
   public readonly liquidity: JSBI
   public readonly tickCurrent: number
@@ -33,18 +34,19 @@ export class Pool {
   public static getAddress(
     tokenA: Token,
     tokenB: Token,
-    fee: FeeAmount,
+    tickSpacing: number,
     initCodeHashManualOverride?: string,
     factoryAddressOverride?: string
   ): string {
     return computePoolAddress({
       factoryAddress: factoryAddressOverride ?? FACTORY_ADDRESS,
-      fee,
+      tickSpacing,
       tokenA,
       tokenB,
-      initCodeHashManualOverride,
+      initCodeHash: initCodeHashManualOverride ?? POOL_INIT_CODE_HASH,
     })
   }
+
 
   /**
    * Construct a pool
@@ -60,6 +62,7 @@ export class Pool {
     tokenA: Token,
     tokenB: Token,
     fee: FeeAmount,
+    tickSpacing: number,
     sqrtRatioX96: BigintIsh,
     liquidity: BigintIsh,
     tickCurrent: number,
@@ -71,16 +74,17 @@ export class Pool {
     const nextTickSqrtRatioX96 = TickMath.getSqrtRatioAtTick(tickCurrent + 1)
     invariant(
       JSBI.greaterThanOrEqual(JSBI.BigInt(sqrtRatioX96), tickCurrentSqrtRatioX96) &&
-        JSBI.lessThanOrEqual(JSBI.BigInt(sqrtRatioX96), nextTickSqrtRatioX96),
+      JSBI.lessThanOrEqual(JSBI.BigInt(sqrtRatioX96), nextTickSqrtRatioX96),
       'PRICE_BOUNDS'
     )
-    // always create a copy of the list since we want the pool's tick list to be immutable
-    ;[this.token0, this.token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
+      // always create a copy of the list since we want the pool's tick list to be immutable
+      ;[this.token0, this.token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
     this.fee = fee
+    this.tickSpacing = tickSpacing
     this.sqrtRatioX96 = JSBI.BigInt(sqrtRatioX96)
     this.liquidity = JSBI.BigInt(liquidity)
     this.tickCurrent = tickCurrent
-    this.tickDataProvider = Array.isArray(ticks) ? new TickListDataProvider(ticks, TICK_SPACINGS[fee]) : ticks
+    this.tickDataProvider = Array.isArray(ticks) ? new TickListDataProvider(ticks, tickSpacing) : ticks
   }
 
   /**
@@ -162,7 +166,7 @@ export class Pool {
     const outputToken = zeroForOne ? this.token1 : this.token0
     return [
       CurrencyAmount.fromRawAmount(outputToken, JSBI.multiply(outputAmount, NEGATIVE_ONE)),
-      new Pool(this.token0, this.token1, this.fee, sqrtRatioX96, liquidity, tickCurrent, this.tickDataProvider),
+      new Pool(this.token0, this.token1, this.fee, this.tickSpacing, sqrtRatioX96, liquidity, tickCurrent, this.tickDataProvider),
     ]
   }
 
@@ -189,7 +193,7 @@ export class Pool {
     const inputToken = zeroForOne ? this.token0 : this.token1
     return [
       CurrencyAmount.fromRawAmount(inputToken, inputAmount),
-      new Pool(this.token0, this.token1, this.fee, sqrtRatioX96, liquidity, tickCurrent, this.tickDataProvider),
+      new Pool(this.token0, this.token1, this.fee, this.tickSpacing, sqrtRatioX96, liquidity, tickCurrent, this.tickDataProvider),
     ]
   }
 
@@ -221,7 +225,7 @@ export class Pool {
     )
   }
 
-  public get tickSpacing(): number {
-    return TICK_SPACINGS[this.fee]
-  }
+  // public get tickSpacing(): number {
+  //   return TICK_SPACINGS[this.fee]
+  // }
 }
