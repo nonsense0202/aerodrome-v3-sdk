@@ -1,8 +1,8 @@
 import { Interface } from '@ethersproject/abi'
 import { BigintIsh, Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import { encodeRouteToPath, MethodParameters, toHex } from './utils'
-import IQuoter from '@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json'
-import IQuoterV2 from '@uniswap/swap-router-contracts/artifacts/contracts/lens/QuoterV2.sol/QuoterV2.json'
+import IQuoter from './abis/IQuoter.json'
+import IQuoterV2 from './abis/IQuoterV2.json'
 import { Route } from './entities'
 import invariant from 'tiny-invariant'
 
